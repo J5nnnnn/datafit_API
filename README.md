@@ -13,13 +13,13 @@ pip3 install numpy
 # server code running on 8000 since the default 5000 port on Mac OSX 12.X is already in use and may lead to 403 response error
 
 ## API Description
-Servers:
-    - description: Data Fit predicting product category
-    url: http://127.0.0.1
-    port: 8000
-paths:
-    /classify
-        post:
+Servers: 
+    - description: Data Fit predicting product category 
+    url: http://127.0.0.1 
+    port: 8000 
+paths: 
+    /classify 
+        post: 
             description: classify a list of products
             parameters:
                 none
