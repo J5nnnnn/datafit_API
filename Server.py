@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_restful import Api, Resource, reqparse
 import numpy as np
 import json
+from model_load import load_model, payload_preprocessing
 
 # Start Flask app
 app = Flask(__name__)
@@ -21,10 +22,13 @@ class Classifer(Resource):
             print(args)
             products_name = args['data']
             print(products_name)
+            print(payload_preprocessing(model))
             return "success!"
         else:
             return "Invalid payload format", 400
 
+
+print("outside run!!")
 
 api.add_resource(Classifer, '/classify')
 
@@ -36,4 +40,6 @@ def hello():
 
 
 if __name__ == '__main__':
-    app.run(port=8000, debug=True)
+    model = load_model()
+    print("main run")
+    app.run(port=8000)
