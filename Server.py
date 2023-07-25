@@ -19,11 +19,11 @@ class Classifer(Resource):
     def post(self):
         if request.is_json:
             args = request.get_json()
-            print(args)
             products_name = args['data']
             print(products_name)
-            print(payload_preprocessing(model))
-            return "success!"
+            res = payload_preprocessing(model, products_name)
+            print(res)
+            return json.dumps(res)
         else:
             return "Invalid payload format", 400
 

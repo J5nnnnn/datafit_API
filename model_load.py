@@ -55,26 +55,22 @@ def tokenize_function(examples):
     return tokenizer(examples["name"], padding=params["padding"], truncation=params["truncation"], max_length= params["max_length"])
 
 
-def payload_preprocessing(new_model):
+def payload_preprocessing(new_model, payload):
     # just process current given input
-    df = pd.read_csv('sample_labelled_data.csv')
+    df = pd.read_csv('product_category_data.csv')
 
     label_encoder = preprocessing.LabelEncoder()
     ## Encode labels in column 'top_category'
-    df['label'] = label_encoder.fit_transform(df['top_category'])
+    label_encoder.fit_transform(df['top_category'])
 
-    df = df[['name','label']]
-    pred_df = df.head(4) # take only the first 2 rows to predict
+    pred_df = pd.DataFrame(payload, columns=["name"])
 
     pred_dict = {
         'pred': Dataset.from_pandas(pred_df)
     }
     pred_dataset = DatasetDict(pred_dict)
     # pred_dataset['pred'] = pred_dataset['pred'].remove_columns('__index_level_0__')
-    print(pred_dataset["pred"])
 
-    # seems unused?
-    tokenizer = AutoTokenizer.from_pretrained(params['bert'])
     tokenized_pred_datasets = pred_dataset['pred'].map(tokenize_function)
 
     data_collator = DefaultDataCollator(return_tensors=params['return_tensors'])
@@ -86,7 +82,11 @@ def payload_preprocessing(new_model):
         batch_size=params['batch_size'],)
 
     pred_logits = new_model.predict(tf_pred_dataset).logits
-    return pred_logits
+    res = np.argmax(pred_logits, axis=-1)
+
+    predicted_label = label_encoder.inverse_transform(res)
+
+    return predicted_label.tolist()
 
 
 # def main():
