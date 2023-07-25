@@ -1,7 +1,7 @@
 ## Installation
 ### make sure to update your python version to at least 3.10
 
-### flask server
+### Flask server
 pip3 install flask
 
 python3 -c "import flask; print(flask.__version__)"
@@ -11,12 +11,17 @@ pip3 install flask_restful
 pip3 install numpy
 
 ### ML package
-pip install translators --upgrade
-pip install tensorflow
-pip install tensorflow_hub
-pip install tensorflow-text
-pip install transformers
-pip install datasets
+pip3 install translators --upgrade
+
+pip3 install tensorflow
+
+pip3 install tensorflow_hub
+
+pip3 install tensorflow-text
+
+pip3 install transformers
+
+pip3 install datasets
 
 
 ### server code running on 8000 since the default 5000 port on Mac OSX 12.X is already in use and may lead to 403 response error
@@ -41,7 +46,9 @@ pip install datasets
                 - '400':  
                     - description: Invalid payload format  
                 - '200':
-                    - description: predict successful  
+                    - description: list of the predicted category names
+                    - content:
+                        -  application/json  
 
 ## Postman test format
 url: http://127.0.0.1:8000/classify  
@@ -60,3 +67,4 @@ curl -H 'Content-Type: application/json' \
 
 
 ## Integratation with Bert Model
+Currently, the model is loaded from the training weight. will work on to import the entire model for future work
