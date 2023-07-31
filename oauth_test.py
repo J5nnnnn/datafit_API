@@ -1,4 +1,4 @@
-from flask import Flask, url_for, redirect, session
+from flask import Flask, url_for, redirect, session, render_template
 from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
@@ -20,9 +20,8 @@ google = oauth.register(
 )
 
 @app.route('/')
-def hello_world():
-    email = dict(session).get('email', None)
-    return f'Hello, {email}!'
+def index():
+    return render_template('index.html')
 
 # the first route when logging in
 @app.route('/login')
@@ -36,9 +35,27 @@ def login():
 def authorize():
     google = oauth.create_client('google')
     token = google.authorize_access_token()
-    resp = google.get('userinfo')
+    resp = google.get('userinfo') #use get function to retrieve user info, including email and other details
     resp.raise_for_status()
     user_info = resp.json()
     # do something with the token and profile
-    session['email'] = user_info['email']
+    session['email'] = user_info['email'] # stores emails in userinfo into session
+    return redirect('/classify')
+
+@app.route('/classify', methods=['POST'])
+def classify():
+    if 'email' not in session:
+        return render_template('login')
+    else:
+        # Todo: call the api by clicking the button
+        return render_template('classify.html')
+    
+
+@app.route('/logout')
+def logout():
+    for key in list(session.keys()):
+        session.pop(key)
     return redirect('/')
+
+if __name__ == '__main__':
+    app.run(port=7000)
