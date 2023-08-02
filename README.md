@@ -109,10 +109,15 @@ Body: (in JSON)
 
 ## Curl test format
 curl -H 'Content-Type: application/json' \
-    -d '{ "title":"foo","body":"bar", "id": 1, "data":["dunhill mild 16", "apache filter 12", "aqua 1500ml", "sasa 1kg", "close up 160gr"]}' \
+    -d '{ "title":"foo","body":"bar", "id": 1, "data":["dunhill mild 16", "apache filter 12", "aqua 1500ml", "sasa 1kg", "close up 160gr", "gpu 60ml", "mama lemon 800ml"]}' \
     -X POST \
     http://127.0.0.1:8000/classify
 
+
+curl -H 'Content-Type: application/json' \
+    -d '{ "title":"foo","body":"bar", "id": 1, "data":["uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr"]}' \
+    -X POST \
+    http://127.0.0.1:8000/classify
 
 ## Integratation with Bert Model
 Currently, the model is loaded from the training weight. will work on to import the entire model for future work. 
