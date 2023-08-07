@@ -8,7 +8,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from datetime import datetime, timedelta
 from functools import wraps
-# from model_load import load_model, payload_preprocessing
+
+import time
+from model_load_rnn import load_model, payload_preprocessing
 
 # Start Flask app
 app = Flask(__name__)
@@ -26,13 +28,15 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 # creates SQLALCHEMY object
 db = SQLAlchemy(app)
 
+
 # Database ORMs
 class User(db.Model):
-	id = db.Column(db.Integer, primary_key = True)
-	public_id = db.Column(db.String(50), unique = True)
+	id = db.Column(db.Integer, primary_key=True)
+	public_id = db.Column(db.String(50), unique=True)
 	name = db.Column(db.String(100))
-	email = db.Column(db.String(70), unique = True)
+	email = db.Column(db.String(70), unique=True)
 	password = db.Column(db.String(80))
+
 
 # decorator for verifying the JWT
 def token_required(f):
@@ -63,9 +67,10 @@ def token_required(f):
 
 	return decorated
 
+
 # User Database Route
 # this route sends back list of users
-@app.route('/user', methods =['GET'])
+@app.route('/user', methods=['GET'])
 @token_required
 def get_all_users(current_user):
 	# querying the database
@@ -85,8 +90,9 @@ def get_all_users(current_user):
 
 	return jsonify({'users': output})
 
+
 # route for logging user in
-@app.route('/login', methods =['POST'])
+@app.route('/login', methods=['POST'])
 def login():
 	# creates dictionary of form data
 	auth = request.form
@@ -174,8 +180,10 @@ class Classifer(Resource):
 				args = request.get_json()
 				products_name = args['data']
 				print(products_name)
-				# res = payload_preprocessing(model, products_name)
-				# print(res)
+				t1 = time.time()
+				res = payload_preprocessing(model, products_name)
+				t2 = time.time()
+				print(res)
 				return json.dumps(products_name)
 		else:
 				return "Invalid payload format", 400
@@ -192,6 +200,6 @@ def hello():
 
 
 if __name__ == '__main__':
-#    model = load_model()
+    model = load_model()
     print("main run")
     app.run(port=8000)

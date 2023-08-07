@@ -30,6 +30,9 @@ from datasets import Dataset, DatasetDict
 from transformers import DefaultDataCollator
 from transformers import BertTokenizer
 
+import time
+
+
 params = {
     "bert": "cahya/bert-base-indonesian-522M",
     "num_labels": 42,
@@ -57,11 +60,16 @@ def tokenize_function(examples):
 
 def payload_preprocessing(new_model, payload):
     # just process current given input
+    t1 = time.time()
     df = pd.read_csv('product_category_data.csv')
+
+    t2 = time.time()
 
     label_encoder = preprocessing.LabelEncoder()
     ## Encode labels in column 'top_category'
     label_encoder.fit_transform(df['top_category'])
+
+    t3 = time.time()
 
     pred_df = pd.DataFrame(payload, columns=["name"])
 
@@ -81,11 +89,20 @@ def payload_preprocessing(new_model, payload):
         collate_fn=data_collator,
         batch_size=params['batch_size'],)
 
+    t4 = time.time()
     pred_logits = new_model.predict(tf_pred_dataset).logits
+    t5 = time.time()
     res = np.argmax(pred_logits, axis=-1)
 
     predicted_label = label_encoder.inverse_transform(res)
 
+    t6 = time.time()
+
+    print("load csv: ", t2 - t1, " s")
+    print("label encoder: ", t3 - t2, " s")
+    print("tokonize: ", t4 - t3, " s")
+    print("model predict: ", t5 - t4, " s")
+    print("inverse transform: ", t6 - t5, " s")
     return predicted_label.tolist()
 
 
