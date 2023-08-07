@@ -2,11 +2,13 @@
 ### make sure to update your python version to at least 3.10
 
 ### environment
-python3 -m venv env
+python3 -m venv env  
 source env/bin/activate
 
 ### Flask server
 pip install -r requirements.txt
+
+pip install --upgrade pip==23.2.1
 
 pip3 install flask
 
@@ -31,7 +33,7 @@ pip3 install datasets
 
 ### connect to database in python3 interpreter
 python3
-from Server import db, app
+from Server import db, app  
 with app.app_context():db.create_all()
 
 
