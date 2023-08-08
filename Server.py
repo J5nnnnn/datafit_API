@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, make_response, g
 from flask_restful import Api, Resource, reqparse
-import numpy as np
+#import numpy as np
 import json
 from flask_sqlalchemy import SQLAlchemy
 import uuid 
@@ -8,9 +8,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from datetime import datetime, timedelta
 from functools import wraps
-
+from email_validator import validate_email, EmailNotValidError
 import time
-from model_load_rnn import load_model, payload_preprocessing
+#from model_load_rnn import load_model, payload_preprocessing
 
 # Start Flask app
 app = Flask(__name__)
@@ -33,7 +33,7 @@ db = SQLAlchemy(app)
 class User(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	public_id = db.Column(db.String(50), unique=True)
-	name = db.Column(db.String(100))
+	name = db.Column(db.String(100), unique=True)
 	email = db.Column(db.String(70), unique=True)
 	password = db.Column(db.String(80))
 
@@ -141,27 +141,48 @@ def signup():
 	# gets name, email and password
 	name, email = data.get('name'), data.get('email')
 	password = data.get('password')
+ 
+	try:                                          
+			v = validate_email(email)
+			email = v["email"]
+	except EmailNotValidError as e:
+			return make_response(str(e), 400)
 
-	# checking for existing user
-	user = User.query\
-		.filter_by(email = email)\
+		# Username length validation
+	if len(name) < 3 or len(name) > 20:
+			return make_response('Username must be between 3 and 20 characters.', 400)
+
+		# Password length validation
+	if len(password) < 8 or len(password) > 20:
+			return make_response('Password must be between 8 and 20 characters.', 400) 
+
+	# checking for existing user by email
+	user_with_email = User.query\
+		.filter_by(email=email)\
 		.first()
-	if not user:
+
+	# checking for existing user by name
+	user_with_name = User.query\
+		.filter_by(name=name)\
+		.first()
+
+	if user_with_email or user_with_name:
+		# returns 202 if user already exists
+		return make_response('User with this email or name already exists. Please change.', 202)
+	else:
 		# database ORM object
 		user = User(
-			public_id = str(uuid.uuid4()),
-			name = name,
-			email = email,
-			password = generate_password_hash(password)
+			public_id=str(uuid.uuid4()),
+			name=name,
+			email=email,
+			password=generate_password_hash(password, method='sha256')
 		)
 		# insert user
 		db.session.add(user)
 		db.session.commit()
 
 		return make_response('Successfully registered.', 201)
-	else:
-		# returns 202 if user already exists
-		return make_response('User already exists. Please Log in.', 202)
+
 
 # Parser for payload data; The key for products name will be 'data'
 # reqparse does not work well when loading a list of string
@@ -180,10 +201,10 @@ class Classifer(Resource):
 				args = request.get_json()
 				products_name = args['data']
 				print(products_name)
-				t1 = time.time()
-				res = payload_preprocessing(model, products_name)
-				t2 = time.time()
-				print(res)
+			#	t1 = time.time()
+			#	res = payload_preprocessing(model, products_name)
+			#	t2 = time.time()
+			#	print(res)
 				return json.dumps(products_name)
 		else:
 				return "Invalid payload format", 400
@@ -200,6 +221,7 @@ def hello():
 
 
 if __name__ == '__main__':
-    model = load_model()
+    with app.app_context():
+        db.create_all()
     print("main run")
     app.run(port=8000)

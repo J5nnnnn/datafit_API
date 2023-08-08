@@ -3,10 +3,13 @@
 
 ### environment
 python3 -m venv env
+
 source env/bin/activate
 
 ### Flask server
 pip install -r requirements.txt
+
+pip install email-validator
 
 pip3 install flask
 
@@ -29,12 +32,10 @@ pip3 install transformers
 
 pip3 install datasets
 
-### connect to database in python3 interpreter
-python3
-from Server import db, app
-with app.app_context():db.create_all()
+### pytest
+pip install pytest
 
-
+pytest server_test.py
 
 ### server code running on 8000 since the default 5000 port on Mac OSX 12.X is already in use and may lead to 403 response error
 
