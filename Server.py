@@ -247,9 +247,9 @@ def index():
 
 # Route for the profile page
 @app.route('/profile')
-@token_required
-def profile(current_user):
-    return render_template('profile.html', current_user=current_user)
+# @token_required
+def profile():
+    return render_template('profile.html')
 
 @app.route('/logout')
 def logout():

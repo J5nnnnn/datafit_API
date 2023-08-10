@@ -153,7 +153,7 @@ def payload_preprocessing(new_model, sub_model, payload):
 
 def convert_json(l1, l2):
     res = dict()
-    res["sub"] = l2
     res['top'] = l1
+    res["sub"] = l2
 
     return res

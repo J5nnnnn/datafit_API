@@ -1,4 +1,4 @@
-test.py
+test.*
 loading.py
 __pycache__/
 checkpoints/
@@ -11,3 +11,4 @@ saved_model_rnn
 Checkpoints_subcat
 instance
 instance/Database.db
+tempCodeRunnerFile

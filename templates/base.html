@@ -30,7 +30,7 @@
                             <a href="{{ url_for('signup') }}" class="navbar-item">
                                 Sign Up
                             </a>
-                            <a href="{{ url_for('logout') }}" class="navbar-item">
+                            <a href="{{ url_for('logout') }}" class="navbar-item" onclick="onClickLogout()">
                                 Logout
                             </a>
                         </div>
@@ -50,3 +50,10 @@
 </body>
 
 </html>
+
+<script>
+    function onClickLogout() {
+        localStorage.removeItem("token");
+    }
+
+</script>
