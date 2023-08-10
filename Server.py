@@ -148,50 +148,50 @@ def signup():
 		password = data.get('password')
     
 
-    try:                                          
-        v = validate_email(email)
-        email = v["email"]
-    except EmailNotValidError as e:
-        return make_response(str(e), 400)
+		try:                                          
+			v = validate_email(email)
+			email = v["email"]
+		except EmailNotValidError as e:
+			return make_response(str(e), 400)
 
-      # Username length validation
-    if len(name) < 3 or len(name) > 20:
-        return make_response('Username must be between 3 and 20 characters.', 400)
+		# Username length validation
+		if len(name) < 3 or len(name) > 20:
+			return make_response('Username must be between 3 and 20 characters.', 400)
 
-      # Password length validation
-    if len(password) < 8 or len(password) > 20:
-        return make_response('Password must be between 8 and 20 characters.', 400) 
+		# Password length validation
+		if len(password) < 8 or len(password) > 20:
+			return make_response('Password must be between 8 and 20 characters.', 400) 
 
-    # checking for existing user by email
-    user_with_email = User.query\
-      .filter_by(email=email)\
-      .first()
 
-    # checking for existing user by name
-    user_with_name = User.query\
-      .filter_by(name=name)\
-      .first()
+		# checking for existing user by email
+		user_with_email = User.query\
+		.filter_by(email=email)\
+		.first()
 
-    if user_with_email or user_with_name:
-      # returns 202 if user already exists
-      # return make_response('User with this email or name already exists. Please change.', 202)
-      flash('User already exists. Please log in.')
+		# checking for existing user by name
+		user_with_name = User.query\
+		.filter_by(name=name)\
+		.first()
+
+		if user_with_email or user_with_name:
+			# returns 202 if user already exists
+			# return make_response('User with this email or name already exists. Please change.', 202)
+			flash('User already exists. Please log in.')
 			return redirect(url_for('login'))
-    else:
-      # database ORM object
-      user = User(
-        public_id=str(uuid.uuid4()),
-        name=name,
-        email=email,
-        password=generate_password_hash(password, method='sha256')
-      )
-      # insert user
-      db.session.add(user)
-      db.session.commit()
-      
-      flash('Account created successfully. Please log in.')
+		else:
+			# database ORM object
+			user = User(
+				public_id=str(uuid.uuid4()),
+				name=name,
+				email=email,
+				password=generate_password_hash(password, method='sha256')
+			)
+			# insert user
+			db.session.add(user)
+			db.session.commit()
+		
+			flash('Account created successfully. Please log in.')
 			return redirect(url_for('login'))
-
 	return render_template('signup.html')
 
 
