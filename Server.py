@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response, g
+from flask import Flask, request, jsonify, make_response, render_template, flash, g, redirect, url_for, session
 from flask_restful import Api, Resource, reqparse
 #import numpy as np
 import json
@@ -94,96 +94,105 @@ def get_all_users(current_user):
 
 
 # route for logging user in
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-	# creates dictionary of form data
-	auth = request.form
+	if request.method == 'POST':
+		# creates dictionary of form data
+		auth = request.form
 
-	if not auth or not auth.get('email') or not auth.get('password'):
-		# returns 401 if any email or / and password is missing
+		if not auth or not auth.get('email') or not auth.get('password'):
+			# returns 401 if any email or / and password is missing
+			return make_response(
+				'Could not verify',
+				401,
+				{'WWW-Authenticate' : 'Basic realm ="Login required !!"'}
+			)
+
+		user = User.query\
+			.filter_by(email = auth.get('email'))\
+			.first()
+
+		if not user:
+			# returns 401 if user does not exist
+			return make_response(
+				'Could not verify',
+				401,
+				{'WWW-Authenticate' : 'Basic realm ="User does not exist !!"'}
+			)
+
+		if check_password_hash(user.password, auth.get('password')):
+			# generates the JWT Token
+			token = jwt.encode({
+				'public_id': user.public_id,
+				'exp' : datetime.utcnow() + timedelta(minutes = 30)
+			}, app.config['SECRET_KEY'])
+
+			return make_response(jsonify({'token' : token.decode('UTF-8')}), 201)
+		# returns 403 if password is wrong
 		return make_response(
 			'Could not verify',
-			401,
-			{'WWW-Authenticate' : 'Basic realm ="Login required !!"'}
+			403,
+			{'WWW-Authenticate' : 'Basic realm ="Wrong Password !!"'}
 		)
-
-	user = User.query\
-		.filter_by(email = auth.get('email'))\
-		.first()
-
-	if not user:
-		# returns 401 if user does not exist
-		return make_response(
-			'Could not verify',
-			401,
-			{'WWW-Authenticate' : 'Basic realm ="User does not exist !!"'}
-		)
-
-	if check_password_hash(user.password, auth.get('password')):
-		# generates the JWT Token
-		token = jwt.encode({
-			'public_id': user.public_id,
-			'exp' : datetime.utcnow() + timedelta(minutes = 30)
-		}, app.config['SECRET_KEY'])
-
-		return make_response(jsonify({'token' : token.decode('UTF-8')}), 201)
-	# returns 403 if password is wrong
-	return make_response(
-		'Could not verify',
-		403,
-		{'WWW-Authenticate' : 'Basic realm ="Wrong Password !!"'}
-	)
+	return render_template('login.html')
 
 # signup route
-@app.route('/signup', methods =['POST'])
+@app.route('/signup', methods =['GET', 'POST'])
 def signup():
-	# creates a dictionary of the form data
-	data = request.form
+	if request.method == 'POST':
+		# creates a dictionary of the form data
+		data = request.form
 
-	# gets name, email and password
-	name, email = data.get('name'), data.get('email')
-	password = data.get('password')
- 
-	try:                                          
-			v = validate_email(email)
-			email = v["email"]
-	except EmailNotValidError as e:
-			return make_response(str(e), 400)
+		# gets name, email and password
+		name, email = data.get('name'), data.get('email')
+		password = data.get('password')
+    
 
-		# Username length validation
-	if len(name) < 3 or len(name) > 20:
-			return make_response('Username must be between 3 and 20 characters.', 400)
+    try:                                          
+        v = validate_email(email)
+        email = v["email"]
+    except EmailNotValidError as e:
+        return make_response(str(e), 400)
 
-		# Password length validation
-	if len(password) < 8 or len(password) > 20:
-			return make_response('Password must be between 8 and 20 characters.', 400) 
+      # Username length validation
+    if len(name) < 3 or len(name) > 20:
+        return make_response('Username must be between 3 and 20 characters.', 400)
 
-	# checking for existing user by email
-	user_with_email = User.query\
-		.filter_by(email=email)\
-		.first()
+      # Password length validation
+    if len(password) < 8 or len(password) > 20:
+        return make_response('Password must be between 8 and 20 characters.', 400) 
 
-	# checking for existing user by name
-	user_with_name = User.query\
-		.filter_by(name=name)\
-		.first()
+    # checking for existing user by email
+    user_with_email = User.query\
+      .filter_by(email=email)\
+      .first()
 
-	if user_with_email or user_with_name:
-		# returns 202 if user already exists
-		return make_response('User with this email or name already exists. Please change.', 202)
-	else:
-		# database ORM object
-		user = User(
-			public_id=str(uuid.uuid4()),
-			name=name,
-			email=email,
-			password=generate_password_hash(password, method='sha256')
-		)
-		# insert user
-		db.session.add(user)
-		db.session.commit()
+    # checking for existing user by name
+    user_with_name = User.query\
+      .filter_by(name=name)\
+      .first()
 
-		return make_response('Successfully registered.', 201)
+    if user_with_email or user_with_name:
+      # returns 202 if user already exists
+      # return make_response('User with this email or name already exists. Please change.', 202)
+      flash('User already exists. Please log in.')
+			return redirect(url_for('login'))
+    else:
+      # database ORM object
+      user = User(
+        public_id=str(uuid.uuid4()),
+        name=name,
+        email=email,
+        password=generate_password_hash(password, method='sha256')
+      )
+      # insert user
+      db.session.add(user)
+      db.session.commit()
+      
+      flash('Account created successfully. Please log in.')
+			return redirect(url_for('login'))
+
+	return render_template('signup.html')
 
 
 # Parser for payload data; The key for products name will be 'data'
@@ -204,11 +213,11 @@ class Classifer(Resource):
 				print(products_name)
 
 				t1 = time.time()
+
 				res = payload_preprocessing(model, model_sub, products_name)
 				t2 = time.time()
 				print(res)
 				return json.dumps(res)
-
 		else:
 				return "Invalid payload format", 400
 
@@ -216,16 +225,47 @@ class Classifer(Resource):
 
 api.add_resource(Classifer, '/classify')
 
+@app.route('/classify', methods=['GET','POST'])
+# @token_required
+def classify():
+	if request.method == 'POST':
+		try:
+			# Call the classifier logic here
+			# This could involve using a machine learning model, processing data, etc.
+			result = "Your classification result"  # Modify this with your actual result
+			return jsonify({'result': result})
+		except Exception as e:
+			return jsonify({'error': 'An error occurred'}), 500
+	else:
+		return render_template('classify.html')
+
 
 # test purpose, will delete after
 @app.route('/')
-def hello():
-    return "hello, world"
+def index():
+	return render_template('index.html')
+
+# Route for the profile page
+@app.route('/profile')
+@token_required
+def profile(current_user):
+    return render_template('profile.html', current_user=current_user)
+
+@app.route('/logout')
+def logout():
+    # Perform logout actions, such as clearing session data
+    # For example:
+    session.clear()
+    # Or remove authentication, etc.
+
+    # Redirect to a different page after logout
+    return redirect(url_for('index'))  # 'home' is the endpoint of your home page
 
 with app.app_context():
     db.create_all()
 
 if __name__ == '__main__':
+
     model = load_model()
     model_sub = load_model_sub()
     print("main run")
