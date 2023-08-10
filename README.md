@@ -3,10 +3,13 @@
 
 ### environment
 python3 -m venv env
+
 source env/bin/activate
 
 ### Flask server
 pip install -r requirements.txt
+
+pip install email-validator
 
 pip3 install flask
 
@@ -29,12 +32,10 @@ pip3 install transformers
 
 pip3 install datasets
 
-### connect to database in python3 interpreter
-python3
-from Server import db, app
-with app.app_context():db.create_all()
+### pytest
+pip install pytest
 
-
+pytest server_test.py
 
 ### server code running on 8000 since the default 5000 port on Mac OSX 12.X is already in use and may lead to 403 response error
 
@@ -106,6 +107,20 @@ Body: (in JSON)
   "data": ["apple", "banana", "orange"],  
   "comment": "test test"  
 }
+
+{
+    "data" : ["uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid"]
+}
+
 
 ## Curl test format
 curl -H 'Content-Type: application/json' \
