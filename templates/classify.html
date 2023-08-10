@@ -35,15 +35,10 @@ async function classifyProduct(event) {
     const data = { data: productName };
 
    try {
-        // retrieve the token
-        const token = localStorage.getItem("jwt");
-        console.log(token);
-
         const response = await fetch("/classify", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "x-access-token": token,
             },
             body: JSON.stringify(data),
         });
