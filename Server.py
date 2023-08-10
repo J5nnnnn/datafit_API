@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response, g
+from flask import Flask, request, jsonify, make_response, render_template, flash, g, redirect, url_for, session
 from flask_restful import Api, Resource, reqparse
 import numpy as np
 import json
@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 
 import time
-from model_load_rnn import load_model, payload_preprocessing
+# from model_load_rnn import load_model, payload_preprocessing
 
 # Start Flask app
 app = Flask(__name__)
@@ -92,76 +92,83 @@ def get_all_users(current_user):
 
 
 # route for logging user in
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-	# creates dictionary of form data
-	auth = request.form
+	if request.method == 'POST':
+		# creates dictionary of form data
+		auth = request.form
 
-	if not auth or not auth.get('email') or not auth.get('password'):
-		# returns 401 if any email or / and password is missing
+		if not auth or not auth.get('email') or not auth.get('password'):
+			# returns 401 if any email or / and password is missing
+			return make_response(
+				'Could not verify',
+				401,
+				{'WWW-Authenticate' : 'Basic realm ="Login required !!"'}
+			)
+
+		user = User.query\
+			.filter_by(email = auth.get('email'))\
+			.first()
+
+		if not user:
+			# returns 401 if user does not exist
+			return make_response(
+				'Could not verify',
+				401,
+				{'WWW-Authenticate' : 'Basic realm ="User does not exist !!"'}
+			)
+
+		if check_password_hash(user.password, auth.get('password')):
+			# generates the JWT Token
+			token = jwt.encode({
+				'public_id': user.public_id,
+				'exp' : datetime.utcnow() + timedelta(minutes = 30)
+			}, app.config['SECRET_KEY'])
+
+			return make_response(jsonify({'token' : token.decode('UTF-8')}), 201)
+		# returns 403 if password is wrong
 		return make_response(
 			'Could not verify',
-			401,
-			{'WWW-Authenticate' : 'Basic realm ="Login required !!"'}
+			403,
+			{'WWW-Authenticate' : 'Basic realm ="Wrong Password !!"'}
 		)
-
-	user = User.query\
-		.filter_by(email = auth.get('email'))\
-		.first()
-
-	if not user:
-		# returns 401 if user does not exist
-		return make_response(
-			'Could not verify',
-			401,
-			{'WWW-Authenticate' : 'Basic realm ="User does not exist !!"'}
-		)
-
-	if check_password_hash(user.password, auth.get('password')):
-		# generates the JWT Token
-		token = jwt.encode({
-			'public_id': user.public_id,
-			'exp' : datetime.utcnow() + timedelta(minutes = 30)
-		}, app.config['SECRET_KEY'])
-
-		return make_response(jsonify({'token' : token.decode('UTF-8')}), 201)
-	# returns 403 if password is wrong
-	return make_response(
-		'Could not verify',
-		403,
-		{'WWW-Authenticate' : 'Basic realm ="Wrong Password !!"'}
-	)
+	return render_template('login.html')
 
 # signup route
-@app.route('/signup', methods =['POST'])
+@app.route('/signup', methods =['GET', 'POST'])
 def signup():
-	# creates a dictionary of the form data
-	data = request.form
+	if request.method == 'POST':
+		# creates a dictionary of the form data
+		data = request.form
 
-	# gets name, email and password
-	name, email = data.get('name'), data.get('email')
-	password = data.get('password')
+		# gets name, email and password
+		name, email = data.get('name'), data.get('email')
+		password = data.get('password')
 
-	# checking for existing user
-	user = User.query\
-		.filter_by(email = email)\
-		.first()
-	if not user:
-		# database ORM object
-		user = User(
-			public_id = str(uuid.uuid4()),
-			name = name,
-			email = email,
-			password = generate_password_hash(password)
-		)
-		# insert user
-		db.session.add(user)
-		db.session.commit()
-
-		return make_response('Successfully registered.', 201)
-	else:
-		# returns 202 if user already exists
-		return make_response('User already exists. Please Log in.', 202)
+		# checking for existing user
+		user = User.query\
+			.filter_by(email = email)\
+			.first()
+		if not user:
+			# database ORM object
+			user = User(
+				public_id = str(uuid.uuid4()),
+				name = name,
+				email = email,
+				password = generate_password_hash(password)
+			)
+			# insert user
+			db.session.add(user)
+			db.session.commit()
+			flash('Account created successfully. Please log in.')
+			return redirect(url_for('login'))
+			# return make_response('Successfully registered.', 201)
+		else:
+			# # returns 202 if user already exists
+			# return make_response('User already exists. Please Log in.', 202)
+			flash('User already exists. Please log in.')
+			return redirect(url_for('login'))
+	return render_template('signup.html')
 
 # Parser for payload data; The key for products name will be 'data'
 # reqparse does not work well when loading a list of string
@@ -181,10 +188,11 @@ class Classifer(Resource):
 				products_name = args['data']
 				print(products_name)
 				t1 = time.time()
-				res = payload_preprocessing(model, products_name)
+				# res = payload_preprocessing(model, products_name)
 				t2 = time.time()
-				print(res)
-				return json.dumps(products_name)
+				print(products_name)
+				# return json.dumps(products_name)
+				return jsonify({'result': 'Classification result here'})
 		else:
 				return "Invalid payload format", 400
 
@@ -192,14 +200,47 @@ class Classifer(Resource):
 
 api.add_resource(Classifer, '/classify')
 
+@app.route('/classify', methods=['GET','POST'])
+# @token_required
+def classify():
+	if request.method == 'POST':
+		try:
+			# Call the classifier logic here
+			# This could involve using a machine learning model, processing data, etc.
+			result = "Your classification result"  # Modify this with your actual result
+			return jsonify({'result': result})
+		except Exception as e:
+			return jsonify({'error': 'An error occurred'}), 500
+	else:
+		return render_template('classify.html')
+
 
 # test purpose, will delete after
 @app.route('/')
-def hello():
-    return "hello, world"
+def index():
+	return render_template('index.html')
+
+# Route for the profile page
+@app.route('/profile')
+@token_required
+def profile(current_user):
+    return render_template('profile.html', current_user=current_user)
+
+@app.route('/logout')
+def logout():
+    # Perform logout actions, such as clearing session data
+    # For example:
+    session.clear()
+    # Or remove authentication, etc.
+
+    # Redirect to a different page after logout
+    return redirect(url_for('index'))  # 'home' is the endpoint of your home page
 
 
 if __name__ == '__main__':
-    model = load_model()
-    print("main run")
-    app.run(port=8000)
+	with app.app_context():
+		db.create_all()
+		# model = load_model()
+		print("main run")
+		app.run(port=8000)
+

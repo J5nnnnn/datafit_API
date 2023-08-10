@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="column is-4 is-offset-4">
+    <h3 class="title">Classify</h3>
+    <div class="box">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification is-danger">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+        {% endwith %}
+        <form onsubmit="classifyProduct(event)">
+            <div class="field">
+                <div class="control">
+                    <input id="product-name" class="input is-large" type="text" name="name" placeholder="Product Name" autofocus="">
+                </div>
+            </div>
+            <button type="submit" class="button is-block is-info is-large is-fullwidth">Search</button>
+        </form>
+    </div>
+
+    <!-- Result area -->
+    <div class="result-box" style="display: none;">
+        <h4 class="title is-4">Classification Result:</h4>
+        <p id="result"></p>
+    </div>
+</div>
+
+<script>
+async function classifyProduct(event) {
+    event.preventDefault();
+    const productName = document.getElementById("product-name").value;
+    const data = { data: productName };
+
+   try {
+        // retrieve the token
+        const token = localStorage.getItem("jwt");
+        console.log(token);
+
+        const response = await fetch("/classify", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-access-token": token,
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            document.getElementById("result").textContent = result;
+            document.querySelector(".result-box").style.display = "block";
+        } else {
+            console.error("Classify failed");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+</script>
+{% endblock %}
