@@ -10,7 +10,9 @@ from datetime import datetime, timedelta
 from functools import wraps
 from email_validator import validate_email, EmailNotValidError
 import time
-#from model_load_rnn import load_model, payload_preprocessing
+
+from model_load import load_model, payload_preprocessing, load_model_sub
+
 
 # Start Flask app
 app = Flask(__name__)
@@ -197,15 +199,16 @@ class Classifer(Resource):
 	def post(self, current_user):
 		current_user = g.current_user  # access the current user with g.current_user
 		if request.is_json:
-				print("is json")
 				args = request.get_json()
-				products_name = args['data']
+				products_name = [x.lower() for x in args['data']]
 				print(products_name)
-			#	t1 = time.time()
-			#	res = payload_preprocessing(model, products_name)
-			#	t2 = time.time()
-			#	print(res)
-				return json.dumps(products_name)
+
+				t1 = time.time()
+				res = payload_preprocessing(model, model_sub, products_name)
+				t2 = time.time()
+				print(res)
+				return json.dumps(res)
+
 		else:
 				return "Invalid payload format", 400
 
@@ -219,9 +222,27 @@ api.add_resource(Classifer, '/classify')
 def hello():
     return "hello, world"
 
+with app.app_context():
+    db.create_all()
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
+    model = load_model()
+    model_sub = load_model_sub()
     print("main run")
     app.run(port=8000)
+
+'''
+have a real db, so we could set up some schema for data format
+db:
+	1. username should be unique
+	2. username not email, should be alert
+	3. 
+
+response code for 400level?
+
+token encryption
+
+GPU to improve the model speed
+
+
+'''

@@ -108,6 +108,20 @@ Body: (in JSON)
   "comment": "test test"  
 }
 
+{
+    "data" : ["uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid",
+    "uj mimi full cream 125ml", "ladaku", "vixal 500ml", "aqua 330ml", "sprite 390ml", "koyo cabe", "abc mocca 27gr", "kuaci rebo milk 13gr r2", "pristine 400ml", "komix kid"]
+}
+
+
 ## Curl test format
 curl -H 'Content-Type: application/json' \
     -d '{ "title":"foo","body":"bar", "id": 1, "data":["dunhill mild 16", "apache filter 12", "aqua 1500ml", "sasa 1kg", "close up 160gr", "gpu 60ml", "mama lemon 800ml"]}' \
