@@ -50,7 +50,7 @@ def token_required(f):
 			token = request.headers['x-access-token']
 		# return 401 if token is not passed
 		if not token:
-			return jsonify({'message' : 'Token is missing !!'}), 401
+			return {'message' : 'Token is missing !!'}, 401
 
 		try:
 			# decoding the payload to fetch the stored details
@@ -61,9 +61,9 @@ def token_required(f):
     		# store data shared during a context 
 			g.current_user = current_user  # store the current user in g
 		except:
-			return jsonify({
+			return {
 				'message' : 'Token is invalid !!'
-			}), 401
+			}, 401
 		# returns the current logged in users context to the routes
 		return f(current_user, *args, **kwargs)
 
