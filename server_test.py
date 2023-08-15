@@ -38,6 +38,10 @@ def client():
 def test_success_signup(client):
     response = client.post('/signup', data=dict(name='Test123', email='testimonial@gmail.com', password='test1234'))
     assert response.status_code == 201
+
+def test_short_username_signup(client):
+    response = client.post('/signup', data=dict(name='T', email='test@test.com', password='test1234'))
+    assert response.status_code == 400
     
 def test_long_username_signup(client):
     response = client.post('/signup', data=dict(name='T'*21, email='test@test.com', password='test'))
@@ -59,6 +63,19 @@ def test_duplicate_email_signup(client):
     # Try to sign up again with the same email
     response2 = client.post('/signup', data=dict(name='Test123', email='duplicate@gmail.com', password='test56756'))
     assert response2.status_code == 202
+    
+def test_invalid_email_signup(client):
+    response = client.post('/signup', data=dict(name='Test', email='invalid-email', password='test1234'))
+    assert response.status_code == 400
+
+def test_duplicate_username_signup(client):
+    # Sign up the first user with a specific username
+    response1 = client.post('/signup', data=dict(name='TestUsername', email='unique12345@gmail.com', password='test1234'))
+    assert response1.status_code == 201
+
+    # Try to sign up again with the same username
+    response2 = client.post('/signup', data=dict(name='TestUsername', email='unique54321@gmail.com', password='test1234'))
+    assert response2.status_code == 202 # or whatever status code indicates a duplicate username error
 
 def test_success_login(client):
     create_user('test_login@test.com', 'test')
@@ -88,11 +105,19 @@ def test_get_all_users(client):
     response = client.get('/user', headers={'x-access-token': token})
     assert response.status_code == 200
 
-def test_classifier(client):
+def test_success_classifier(client):
     user = create_user('test_classifier@test.com', 'test')
     token = get_token(user)
     response = client.post('/classify', headers={'x-access-token': token}, json={'data': ['product1', 'product2']})
     assert response.status_code == 200
+    
+def test_classification_without_token(client):
+    response = client.post('/classify', json={'data': ['product1', 'product2']})
+    assert response.status_code == 401
+    
+def test_classification_with_invalid_token(client):
+    response = client.post('/classify', headers={'x-access-token': 'invalid_token'}, json={'data': ['product1', 'product2']})
+    assert response.status_code == 401
 
 def test_home(client):
     response = client.get('/')
