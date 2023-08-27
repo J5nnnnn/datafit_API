@@ -1,39 +1,109 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
 
-{% block content %}
-<div class="column is-4 is-offset-4">
-    <h3 class="title">Classify</h3>
-    
-    <!-- status box -->
-    <div class="status-box">
-        <p id="status"></p>
-    </div>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Flask Auth Example</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='page_style.css') }}" />
+</head>
 
-    <div class="box">
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="notification is-danger">
-                {{ messages[0] }}
-            </div>
-        {% endif %}
-        {% endwith %}
-        <form onsubmit="classifyProduct(event)">
-            <div class="field">
-                <div class="control">
-                    <input id="product-name" class="input is-large" type="text" name="name" placeholder="Product Name" autofocus="">
+<body>
+    <section class="hero is-fullheight" style="justify-content: flex-start;">
+        <div class="hero-head">
+            <nav class="navbar">
+                <div class="container">
+
+                    <div id="navbarMenuHeroA" class="navbar-menu">
+                        <div class="navbar-end">
+                            <a href="{{ url_for('index') }}" class="navbar-item">
+                                Home
+                            </a>
+                            <a href="{{ url_for('profile') }}" class="navbar-item">
+                                Profile
+                            </a>
+                            <a href="{{ url_for('login') }}" class="navbar-item">
+                                Login
+                            </a>
+                            <a href="{{ url_for('signup') }}" class="navbar-item">
+                                Sign Up
+                            </a>
+                            <a href="{{ url_for('logout') }}" class="navbar-item" onclick="onClickLogout()">
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <section class="hero is-danger" id="theme_color">
+            <div class="hero-body center-item">
+                <div class="title big_words">
+                    Product Categorization Model 
+                </div>
+                <div class="subtitle big_words">
+                    Team DataFit
                 </div>
             </div>
-            <button type="submit" class="button is-block is-info is-large is-fullwidth">Search</button>
-        </form>
-    </div>
+        </section>
 
-    <!-- Result area -->
-    <div class="result-box" style="display: none;">
-        <h4 class="title is-4">Classification Result:</h4>
-        <p id="result"></p>
-    </div>
+        <div class="column is-6 is-offset-3">
+            <h3 class="title">Categorization</h3>
+            
+            <!-- status box -->
+            <div class="status-box">
+                <p id="status"></p>
+            </div>
 
-</div>
+
+            <div class="box">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="notification is-danger">
+                        {{ messages[0] }}
+                    </div>
+                {% endif %}
+                {% endwith %}
+                <form onsubmit="classifyProduct(event)">
+                    <div class="field">
+                        <div class="control">
+                            <input id="product-name" class="input is-large" type="text" name="name" placeholder="Product Name1; Name2; ...; Name N" autofocus="">
+                        </div>
+                    </div>
+                    <button type="submit" class="button is-block is-info is-large is-fullwidth" id="enter">ENTER</button>
+                </form>
+            </div>
+
+            <!-- Result area -->
+            <div class="result-box" style="display: none;">
+                <h4 class="title is-4">Classification Result:</h4>
+                <p id="result"></p>
+            </div>
+
+        </div>
+        <table class="table is-fullwidth is-striped is-hoverable">
+            <thead id="res_header">
+                <!-- <tr class="is-info">
+                    <th>Product Name</th>
+                    <th>Top Category</th>
+                    <th>Sub Category</th>
+                </tr> -->
+            </thead>
+            <tbody id="res_body">
+                <!-- <tr>
+                    <th>123</th>
+                    <th>123</th>
+                    <th>123</th>
+                </tr> -->
+            </tbody>
+
+        </table>
+
+    </section>
+</body>
 
 <script>
 async function classifyProduct(event) {
@@ -43,7 +113,7 @@ async function classifyProduct(event) {
     const data = { data: productList };
     const token = localStorage.getItem("token");
     console.log(token);
-    document.getElementById("status").textContent = "... Loading ...";
+    document.getElementById("enter").classList.add("is-loading");
 
    try {
 
@@ -61,19 +131,66 @@ async function classifyProduct(event) {
             const result = await response.json();
             console.log("res: ", response)
             console.log("result: ", result)
-            document.getElementById("status").textContent = "Finished!";
+            document.getElementById("enter").classList.remove("is-loading");
 
-            document.getElementById("result").textContent = result;
-            document.querySelector(".result-box").style.display = "block";
+            // document.getElementById("result").textContent = result;
+            // document.querySelector(".result-box").style.display = "block";
+            createTable(result, productList)
         } else {
             const msg = await response.json();
             console.log(msg["message"])
             document.getElementById("status").textContent = msg["message"];
-
+            document.getElementById("enter").classList.remove("is-loading");
         }
     } catch (error) {
         console.error("Error:", error);
     }
 }
+
+function createTable(result, list){
+    res = JSON.parse(result)
+    const top = res.top;
+    const sub = res.sub;
+    let length = top.length;
+    const header = document.getElementById("res_header")
+    const body = document.getElementById("res_body")
+    let title_list = ["Product Name", "Top Category", "Sub Category"]
+
+    let res_header = "<tr>"
+
+    for(let i = 0; i < 3; i++){
+
+        res_header += "<th>";
+        res_header += title_list[i];
+        res_header += "</th>";
+    }
+    res_header += "</tr>";
+    
+
+    // adding header
+    
+    header.innerHTML = res_header
+
+    // adding rows
+    let res_body = "";
+
+    for(let i = 0; i < length; i++){
+        res_body += "<tr><th>";
+        res_body += list[i];
+        res_body += "</th><th>"
+        res_body += top[i];
+        res_body += "</th><th>"
+        res_body += sub[i];
+        res_body += "</th></tr>"
+    }
+
+
+    body.innerHTML = res_body;
+    
+
+}
+
+function onClickLogout() {
+        localStorage.removeItem("token");
+    }
 </script>
-{% endblock %}

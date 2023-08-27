@@ -1,0 +1,12 @@
+#theme_color{
+    background-color: #c8102d;
+}
+
+.center-item {
+    justify-content: center;
+    flex-direction: column;
+}
+
+.small_words{
+    font-size: small;
+}

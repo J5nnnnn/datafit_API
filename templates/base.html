@@ -7,11 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flask Auth Example</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='page_style.css') }}" />
 </head>
 
 <body>
     <section class="hero is-fullheight">
-
         <div class="hero-head">
             <nav class="navbar">
                 <div class="container">
@@ -39,13 +39,44 @@
             </nav>
         </div>
 
-        <div class="hero-body">
-            <div class="container has-text-centered">
-                <img src="https://1000logos.net/wp-content/uploads/2022/07/Northeastern-University-Logo.png" alt="School Icon" style="max-height: 300px; width: auto;"/>
-               {% block content %}
-               {% endblock %}
+        <section class="hero is-danger" id="theme_color">
+            <div class="hero-body center-item">
+                <div class="title big_words">
+                    Product Categorization Model 
+                </div>
+                <div class="subtitle big_words">
+                    Team DataFit
+                </div>
             </div>
+        </section>
+        
+        <div class="hero-body">
+            <div class="container has-text-centered center-item">
+                <p class="big_words">
+                    Managed by
+                </p>
+                <img src="{{ url_for('static', filename='school_icon.png') }}" alt="School Icon" style="height: 150px; width: auto;"/>
+                <!-- {% block content %}
+                {% endblock %} -->
+
+            </div>
+
+            <div class="container has-text-centered center-item">
+                <p class="big_words">
+                    Sponsored by
+                </p>
+                <img src="{{ url_for('static', filename='AwanTunai.png') }}" alt="School Icon" style="max-height: 150px; width: auto;"/>
+
+            </div>
+
+            <!--  -->
         </div>
+        <div class="hero-body center-item">
+            <button class="button" onclick="onClickClassify()">
+                Categorize
+            </button>
+        </div>
+
     </section>
 </body>
 
@@ -54,6 +85,10 @@
 <script>
     function onClickLogout() {
         localStorage.removeItem("token");
+    }
+
+    function onClickClassify(){
+        window.location.href = '/classify'
     }
 
 </script>

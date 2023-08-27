@@ -1,0 +1,33 @@
+#theme_color{
+    background-color: #c8102d;
+}
+
+.center-item {
+    justify-content: center;
+    flex-direction: column;
+}
+
+.small_words{
+    font-size: small;
+}
+
+.up{
+    margin-bottom: 30%;
+}
+
+.button{
+    font-size:xx-large;
+}
+
+.big_words{
+    font-size: 240%;
+}
+
+#status{
+    color: #c8102d;
+    text-align: center;
+}
+
+.title{
+    text-align: center;
+}
