@@ -135,9 +135,6 @@ curl -H 'Content-Type: application/json' \
     http://127.0.0.1:8000/classify
 
 ## Integratation with Bert Model
-Currently, the model is loaded from the training weight. will work on to import the entire model for future work. 
+Currently, the model is loaded from the training weight.
 
-## commentted out codes
-Due to invalidation of Apple chip for some packages of Tensorflow, I comment out line 11, 177, 178, 195 in Server.py
-
-
+In order to allow model_load.py work as expected, copy the model checkpoints directory saved from the ML training script, and update the checkpoint address of function load_model() and load_model_sub() to the new checkpoint address.

@@ -61,6 +61,7 @@ def load_model():
     new_model = TFAutoModelForSequenceClassification.from_pretrained(params['bert'], num_labels=params['num_labels'])
     new_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-5),loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),metrics=tf.metrics.SparseCategoricalAccuracy(),)
 
+    # TODO: update to your checkpoints folder
     new_model.load_weights('./checkpoints/my_checkpoint')
     return new_model
 
@@ -69,6 +70,7 @@ def load_model_sub():
     new_model_sub = TFAutoModelForSequenceClassification.from_pretrained(params_sub['bert'], num_labels=params_sub['num_labels'])
     new_model_sub.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=5e-5),loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),metrics=tf.metrics.SparseCategoricalAccuracy(),)
 
+    # TODO: update to your checkpoints folder
     new_model_sub.load_weights('./Checkpoints_subcat/my_checkpoint')
     return new_model_sub
 
